@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Form Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+            font-size: 0.8rem;
+            display: none;
+            margin-top: -8px;
+            margin-bottom: 8px;
+        }
+        .interactive-box {
+            width: 100px;
+            height: 100px;
+            background-color: #007bff;
+            margin: 20px auto;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .success-message {
+            color: green;
+            display: none;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 1rem;
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .form-container {
+                padding: 15px;
+            }
+            input, button, select {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            label {
+                font-size: 0.9rem;
+            }
+            .password-toggle {
+                top: 35px;
+                font-size: 0.9rem;
+            }
+            .interactive-box {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Registration Form</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+                <span class="error" id="usernameError">Username must be 3-20 characters, letters and numbers only</span>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter email" required>
+                <span class="error" id="emailError">Please enter a valid email address</span>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                <span class="error" id="passwordError">Password must be 8-20 characters, including at least one letter, one number, and one special character</span>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+                <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                <span class="error" id="confirmPasswordError">Passwords do not match</span>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" placeholder="Enter age" required>
+                <span class="error" id="ageError">Age must be between 18 and 120</span>
+            </div>
+            <div class="form-group">
+                <label for="country">Country:</label>
+                <select id="country" name="country" required>
+                    <option value="">Select a country</option>
+                    <option value="usa">USA</option>
+                    <option value="canada">Canada</option>
+                    <option value="uk">UK</option>
+                    <option value="other">Other</option>
+                </select>
+                <span class="error" id="countryError">Please select a country</span>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div class="success-message" id="successMessage">Form submitted successfully!</div>
+    </div>
+
+    <div class="interactive-box" id="interactiveBox"></div>
+
+    <script>
+        // Event Listeners
+        const form = document.getElementById('registrationForm');
+        const interactiveBox = document.getElementById('interactiveBox');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const ageInput = document.getElementById('age');
+        const countryInput = document.getElementById('country');
+        const usernameError = document.getElementById('usernameError');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const ageError = document.getElementById('ageError');
+        const countryError = document.getElementById('countryError');
+        const successMessage = document.getElementById('successMessage');
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+
+            // Username validation (3-20 characters, alphanumeric only)
+            const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;
+            if (!usernamePattern.test(usernameInput.value)) {
+                usernameError.style.display = 'block';
+                isValid = false;
+            } else {
+                usernameError.style.display = 'none';
+            }
+
+            // Email validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(emailInput.value)) {
+                emailError.style.display = 'block';
+                isValid = false;
+            } else {
+                emailError.style.display = 'none';
+            }
+
+            // Password validation (8-20 characters, at least one letter, one number, one special character)
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/;
+            if (!passwordPattern.test(passwordInput.value)) {
+                passwordError.style.display = 'block';
+                isValid = false;
+            } else {
+                passwordError.style.display = 'none';
+            }
+
+            // Confirm password validation
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordError.style.display = 'block';
+                isValid = false;
+            } else {
+                confirmPasswordError.style.display = 'none';
+            }
+
+            // Age validation (18-120)
+            const ageValue = parseInt(ageInput.value);
+            if (isNaN(ageValue) || ageValue < 18 || ageValue > 120) {
+                ageError.style.display = 'block';
+                isValid = false;
+            } else {
+                ageError.style.display = 'none';
+            }
+
+            // Country validation
+            if (!countryInput.value) {
+                countryError.style.display = 'block';
+                isValid = false;
+            } else {
+                countryError.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                successMessage.style.display = 'block';
+                form.reset();
+                togglePassword.classList.remove('fa-eye-slash');
+                togglePassword.classList.add('fa-eye');
+                toggleConfirmPassword.classList.remove('fa-eye-slash');
+                toggleConfirmPassword.classList.add('fa-eye');
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        // Password visibility toggle
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.classList.toggle('fa-eye');
+            togglePassword.classList.toggle('fa-eye-slash');
+        });
+
+        toggleConfirmPassword.addEventListener('click', () => {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            toggleConfirmPassword.classList.toggle('fa-eye');
+            toggleConfirmPassword.classList.toggle('fa-eye-slash');
+        });
+
+        // Interactive box events
+        interactiveBox.addEventListener('mouseover', () => {
+            interactiveBox.style.backgroundColor = '#dc3545';
+            interactiveBox.style.transform = 'scale(1.1)';
+        });
+
+        interactiveBox.addEventListener('mouseout', () => {
+            interactiveBox.style.backgroundColor = '#007bff';
+            interactiveBox.style.transform = 'scale(1)';
+        });
+
+        interactiveBox.addEventListener('click', () => {
+            interactiveBox.style.backgroundColor = '#ffc107';
+            setTimeout(() => {
+                interactiveBox.style.backgroundColor = '#007bff';
+            }, 500);
+        });
+
+        // Real-time input validation
+        usernameInput.addEventListener('input', () => {
+            const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;
+            if (usernamePattern.test(usernameInput.value)) {
+                usernameError.style.display = 'none';
+            }
+        });
+
+        emailInput.addEventListener('input', () => {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailPattern.test(emailInput.value)) {
+                emailError.style.display = 'none';
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/;
+            if (passwordPattern.test(passwordInput.value)) {
+                passwordError.style.display = 'none';
+            }
+        });
+
+        confirmPasswordInput.addEventListener('input', () => {
+            if (passwordInput.value === confirmPasswordInput.value) {
+                confirmPasswordError.style.display = 'none';
+            }
+        });
+
+        ageInput.addEventListener('input', () => {
+            const ageValue = parseInt(ageInput.value);
+            if (!isNaN(ageValue) && ageValue >= 18 && ageValue <= 120) {
+                ageError.style.display = 'none';
+            }
+        });
+
+        countryInput.addEventListener('change', () => {
+            if (countryInput.value) {
+                countryError.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
