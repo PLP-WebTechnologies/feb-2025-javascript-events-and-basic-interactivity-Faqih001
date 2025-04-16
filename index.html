@@ -13,6 +13,7 @@
             background-color: #f4f4f4;
             display: flex;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
         .form-container {
@@ -150,7 +151,6 @@
     <script>
         // Event Listeners
         const form = document.getElementById('registrationForm');
-        const interactiveBox = document.getElementById('interactiveBox');
         const usernameInput = document.getElementById('username');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -256,24 +256,6 @@
             confirmPasswordInput.setAttribute('type', type);
             toggleConfirmPassword.classList.toggle('fa-eye');
             toggleConfirmPassword.classList.toggle('fa-eye-slash');
-        });
-
-        // Interactive box events
-        interactiveBox.addEventListener('mouseover', () => {
-            interactiveBox.style.backgroundColor = '#dc3545';
-            interactiveBox.style.transform = 'scale(1.1)';
-        });
-
-        interactiveBox.addEventListener('mouseout', () => {
-            interactiveBox.style.backgroundColor = '#007bff';
-            interactiveBox.style.transform = 'scale(1)';
-        });
-
-        interactiveBox.addEventListener('click', () => {
-            interactiveBox.style.backgroundColor = '#ffc107';
-            setTimeout(() => {
-                interactiveBox.style.backgroundColor = '#007bff';
-            }, 500);
         });
 
         // Real-time input validation
